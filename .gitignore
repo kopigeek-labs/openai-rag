@@ -4,3 +4,6 @@ venv/
 __pycache__/
 .DS_Store
 .ipynb_checkpoints
+
+#images
+data/sample_clothes
