@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import json
+import ast
 import tiktoken
 import concurrent.futures
 from openai import OpenAI
@@ -93,18 +94,18 @@ def analyze_image(image_base64, subcategories):
     return features
 
     
-def main():
-    styles_filepath = "data/sample_clothes/sample_styles.csv"
-    output_filepath = "data/sample_clothes/sample_styles_with_embeddings.csv"
-    if not os.path.exists(styles_filepath):
-        print(f"File {styles_filepath} not found.")
-        return
-    styles_df = pd.read_csv(styles_filepath, on_bad_lines='skip')
-    print(styles_df.head())
-    print(f"Opened dataset successfully. Dataset has {len(styles_df)} items of clothing.")
-    styles_df = generate_embeddings(styles_df, 'productDisplayName')
-    styles_df.to_csv(output_filepath, index=False)
-    print(f"Embeddings successfully stored in {output_filepath}")
+# def main():
+#     styles_filepath = "data/sample_clothes/sample_styles.csv"
+#     output_filepath = "data/sample_clothes/sample_styles_with_embeddings.csv"
+#     if not os.path.exists(styles_filepath):
+#         print(f"File {styles_filepath} not found.")
+#         return
+#     styles_df = pd.read_csv(styles_filepath, on_bad_lines='skip')
+#     print(styles_df.head())
+#     print(f"Opened dataset successfully. Dataset has {len(styles_df)} items of clothing.")
+#     styles_df = generate_embeddings(styles_df, 'productDisplayName')
+#     styles_df.to_csv(output_filepath, index=False)
+#     print(f"Embeddings successfully stored in {output_filepath}")
 
-if __name__ == "__main__":
-    main();
+# if __name__ == "__main__":
+#     main();

@@ -6,4 +6,7 @@ __pycache__/
 .ipynb_checkpoints
 
 #images
-data/sample_clothes
+data/
+
+#trae
+.trae/
