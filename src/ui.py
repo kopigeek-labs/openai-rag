@@ -2,7 +2,7 @@ import gradio as gr
 import json
 import os
 from src.utils import encode_image_to_base64
-from retailnext import analyze_image
+from src.main import analyze_image
 import pandas as pd
 
 def get_unique_subcategories():
