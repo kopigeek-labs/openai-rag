@@ -1,42 +1,42 @@
-/* ───────────── Global ───────────── */
-body, .block {
-  background-color: #FFFFFF;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333333;
-  margin: 0;
-  padding: 0;
+/* ───────────── Variables ───────────── */
+:root {
+  --bg-base:     #FCFAF6;   /* very light cream */
+  --text-body:   #333333;   /* dark grey */
+  --gold-primary:#E6A400;   /* warm golden accent */
+  --gold-light:  #FFF4D9;   /* pale highlight */
+  --border-light:#DDD6C5;   /* subtle neutral */
+  --btn-hover:   #CC8F00;   /* darker on hover */
 }
 
-/* ───────────── Scrollbar ───────────── */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background: #E0E0E0;
-  border-radius: 3px;
+/* ───────────── Global ───────────── */
+body, .block {
+  background-color: var(--bg-base);
+  color: var(--text-body);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0; padding: 0;
 }
 
 /* ───────────── Header ───────────── */
 #header {
-  background-color: #FFFFFF;
+  background: var(--bg-base);
   padding: 1rem 2rem;
-  border-bottom: 1px solid #F0F0F0;
+  border-bottom: 1px solid var(--border-light);
 }
 #header h1 {
-  color: #FF6600;
+  color: var(--gold-primary);
   font-size: 1.8rem;
   margin: 0;
 }
 .subtitle {
-  color: #777777;
+  color: #555555;
   font-size: 1rem;
   margin: 0.5rem 0 1.5rem;
 }
 
 /* ───────────── Cards & Containers ───────────── */
 .card, .gr-accordion {
-  background-color: #FFFFFF;
-  border: 1px solid #F0F0F0;
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
   border-radius: 0.25rem;
   padding: 1rem;
   margin-bottom: 1.5rem;
@@ -44,31 +44,34 @@ body, .block {
 
 /* ───────────── Buttons ───────────── */
 .gr-button, button {
-  background-color: #FF6600 !important;
-  color: #FFFFFF !important;
-  border: none !important;
+  background: #FFFFFF !important;
+  color: var(--gold-primary) !important;
+  border: 1px solid var(--gold-primary) !important;
   border-radius: 0.25rem !important;
   padding: 0.5rem 1rem !important;
   font-weight: 600 !important;
   font-size: 1rem !important;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 .gr-button:hover, button:hover {
-  background-color: #e65500 !important;  /* slightly darker on hover */
+  background: var(--gold-primary) !important;
+  color: #FFFFFF !important;
+  border-color: var(--btn-hover) !important;
 }
 
 /* ───────────── Form Elements ───────────── */
 .gr-textbox, .gr-image, .gr-gallery, .gr-html {
-  background: #FAFAFA !important;
-  border: 1px solid #E8E8E8 !important;
+  background: #FFFFFF !important;
+  border: 1px solid var(--border-light) !important;
   border-radius: 0.25rem !important;
   margin-bottom: 1rem !important;
 }
 
 /* ───────────── Typography ───────────── */
 .gr-markdown h2, .gr-markdown h3 {
-  color: #FF6600;
+  color: var(--gold-primary);
   font-weight: 700;
+  margin-top: 1.2rem;
 }
 .gr-markdown p, .gr-markdown li {
   line-height: 1.5;
@@ -84,7 +87,7 @@ body, .block {
   transition: box-shadow 0.2s;
 }
 #rec_gallery .gallery-item img:hover {
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* Step 3 big carousel */

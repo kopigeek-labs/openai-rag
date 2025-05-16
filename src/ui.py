@@ -23,8 +23,6 @@ def get_unique_subcategories():
     return styles_df['articleType'].unique().tolist()
 
 SUBCATEGORIES = get_unique_subcategories()
-# print(f"There are {len(subcategories)} unique subcategories, such as:")
-# print(unique_subcategories)
 
 def analyze_step(image_np):
     """Step 1: analyze the image, stash the JSON, and return it."""
