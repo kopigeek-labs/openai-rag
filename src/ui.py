@@ -156,7 +156,7 @@ with gr.Blocks(css=CSS, theme="light") as demo:
     with gr.Row(elem_classes="card"):
         with gr.Column(scale=6):
             with gr.Column(scale=6):
-                gr.Markdown("**Step 1: Upload an image for analysis**", elem_id="step1-label")
+                gr.Markdown("**Step 1: Upload an image for analysis**", elem_id="step-label")
                 img = gr.Image(type="numpy", label="Upload Product Image")
                 analyze_btn = gr.Button("🔍 Analyze the look!", variant="primary")
         with gr.Column(scale=6):
@@ -169,15 +169,22 @@ with gr.Blocks(css=CSS, theme="light") as demo:
     analysis_state = gr.State()
 
     # === Step 2 card ===
-    with gr.Accordion("Step 2: Use GPT4o-Mini to recommend a new look:", open=True, elem_classes="card"):
+    with gr.Row(elem_classes="card"):
+        gr.Markdown("**Step 2: Use GPT4o-Mini to recommend a new look:**", elem_id="step-label")
+    with gr.Accordion(open=True):
         gallery = gr.Gallery(
             label="Matching Items",
             elem_id="rec_gallery",
-            columns=4, height="300px"
+            columns=4, 
+            height="300px",
+            interactive=False,
         )
-    recommend_btn   = gr.Button("🛍️ Recommend Matching Products", visible=False, variant="primary")
+    recommend_btn = gr.Button("🛍️ Recommend Matching Products", visible=False, variant="primary")
 
-    with gr.Accordion("Step 3: Validate Outfit Matches", open=True, elem_classes="card"):
+    # === Step 3 card ===
+    with gr.Row(elem_classes="card"):
+        gr.Markdown("**Step 3: Validate Outfit Matches:**", elem_id="step-label")
+    with gr.Accordion(open=True):
         validated_gallery = gr.Gallery(
             label="Validated Matches",
             columns=2,
