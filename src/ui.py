@@ -137,8 +137,11 @@ def validate_matches_step(image_np, gallery_paths):
             validated.append(img_path)
             reasons.append(f"Match: {os.path.basename(img_path)}\nReason: {result.get('reason', '')}")
     if not validated:
-        return [], "No valid matches found."
-    return validated, "\n\n".join(reasons)
+        return [], []
+
+    # build list of (img, caption)
+    gallery_items = list(zip(validated, reasons))
+    return gallery_items
 
 # —— Build the UI ——
 with gr.Blocks(css=CSS, theme="light") as demo:
@@ -177,11 +180,8 @@ with gr.Blocks(css=CSS, theme="light") as demo:
     with gr.Accordion("Step 3: Validate Outfit Matches", open=True, elem_classes="card"):
         validated_gallery = gr.Gallery(
             label="Validated Matches",
-            columns=4, height="300px"
-        )
-        validation_reasons = gr.Textbox(
-            label="Validation Reasoning",
-            interactive=False, lines=6
+            columns=2,
+            height="300px"
         )
     validate_btn = gr.Button("✅ Validate Outfit Matches", visible=False, variant="primary")
     
@@ -202,7 +202,7 @@ with gr.Blocks(css=CSS, theme="light") as demo:
     validate_btn.click(
         fn=validate_matches_step,
         inputs=[img, gallery],
-        outputs=[validated_gallery, validation_reasons],
+        outputs=[validated_gallery],
         show_progress=True
     )
 
