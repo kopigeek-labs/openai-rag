@@ -1,0 +1,107 @@
+/* ───────────── Global ───────────── */
+body, .block {
+  background-color: #FFFFFF;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333333;
+  margin: 0;
+  padding: 0;
+}
+
+/* ───────────── Scrollbar ───────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #E0E0E0;
+  border-radius: 3px;
+}
+
+/* ───────────── Header ───────────── */
+#header {
+  background-color: #FFFFFF;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #F0F0F0;
+}
+#header h1 {
+  color: #FF6600;
+  font-size: 1.8rem;
+  margin: 0;
+}
+.subtitle {
+  color: #777777;
+  font-size: 1rem;
+  margin: 0.5rem 0 1.5rem;
+}
+
+/* ───────────── Cards & Containers ───────────── */
+.card, .gr-accordion {
+  background-color: #FFFFFF;
+  border: 1px solid #F0F0F0;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ───────────── Buttons ───────────── */
+.gr-button, button {
+  background-color: #FF6600 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 0.25rem !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  transition: background-color 0.2s;
+}
+.gr-button:hover, button:hover {
+  background-color: #e65500 !important;  /* slightly darker on hover */
+}
+
+/* ───────────── Form Elements ───────────── */
+.gr-textbox, .gr-image, .gr-gallery, .gr-html {
+  background: #FAFAFA !important;
+  border: 1px solid #E8E8E8 !important;
+  border-radius: 0.25rem !important;
+  margin-bottom: 1rem !important;
+}
+
+/* ───────────── Typography ───────────── */
+.gr-markdown h2, .gr-markdown h3 {
+  color: #FF6600;
+  font-weight: 700;
+}
+.gr-markdown p, .gr-markdown li {
+  line-height: 1.5;
+}
+
+/* ───────────── Gallery Thumbnails ───────────── */
+/* Step 2 small thumbs */
+#rec_gallery .gallery-item img {
+  width: 128px !important;
+  height: 128px !important;
+  object-fit: contain;
+  border-radius: 0.25rem;
+  transition: box-shadow 0.2s;
+}
+#rec_gallery .gallery-item img:hover {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* Step 3 big carousel */
+#big_carousel .gallery-container {
+  display: flex !important;
+  overflow-x: auto  !important;
+  scroll-snap-type: x mandatory;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+}
+#big_carousel .gallery-item {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+  scroll-snap-align: center;
+}
+#preview img {
+  width: 100% !important;
+  height: auto   !important;
+  border-radius: 0.25rem;
+}

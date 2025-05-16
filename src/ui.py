@@ -7,77 +7,13 @@ from src.main import analyze_image, get_embeddings, check_match
 
 IMAGES_DIR = os.path.abspath("data/sample_clothes/sample_images")
 
-CSS = """
-/* overall page bg and font */
-body, .block {
-  background-color: #f5f7fa !important;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-/* header */
-#header {
-  background-color: #ffffff;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid #e0e0e0;
-}
-#header h1 {
-  color: #0d47a1;
-  margin: 0;
-  font-size: 1.8rem;
-}
-.subtitle {
-  color: #555555;
-  margin-top: 0.2rem;
-  margin-bottom: 1.5rem;
-}
-/* buttons */
-.gr-button {
-  background-color: #0d47a1 !important;
-  color: white !important;
-  border-radius: 0.3rem !important;
-  padding: 0.5rem 1rem !important;
-  font-weight: 600 !important;
-}
-.gr-button:hover {
-  background-color: #1565c0 !important;
-}
-/* card containers */
-.card {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-bottom: 1rem;
-}
-/* gallery thumbnails */
-#rec_gallery .gallery-item img {
-  width: 128px !important;
-  height: 128px !important;
-  object-fit: contain;
-}
-/* make each “slide” fill the full Gallery width */
-#big_carousel .gallery-item {
-  flex: 0 0 100% !important;
-  max-width: 100% !important;
-}
+# Load CSS from external file
+def load_css():
+    css_path = os.path.join(os.path.dirname(__file__), 'static', 'styles.css')
+    with open(css_path, 'r') as f:
+        return f.read()
 
-/* lay out items in a row and allow horizontal scroll */
-#big_carousel .gallery-container {
-  display: flex !important;
-  overflow-x: auto  !important;
-  scroll-snap-type: x mandatory;
-}
-
-/* optional: snap each item into place as you scroll */
-#big_carousel .gallery-item {
-  scroll-snap-align: center;
-}
-
-#preview img {
-  width: 100% !important;
-  height: auto   !important;
-}
-"""
+CSS = load_css()
 
 def get_unique_subcategories():
     styles_filepath = "data/sample_clothes/sample_styles.csv"
@@ -168,20 +104,31 @@ def validate_matches_step(image_np, gallery_paths):
 
 # —— Build the UI ——
 with gr.Blocks(css=CSS, theme="light") as demo:
-    # HEADER
+    # HEADER & Branding
     gr.HTML("""
       <div id="header">
-        <h1>👗 GPT4o-mini Clothing Style Analyzer & Recommender</h1>
+        <h1>👗 GPT4o Clothing Style Analyzer</h1>
+        <p>Discover, recommend, and validate fashion looks with AI. Powered by GPT-4o-mini.</p>
+      </div>
+    """)
+    # Stepper
+    gr.HTML("""
+      <div class="stepper">
+        <div class="step">1. Analyze</div>
+        <div class="step inactive">2. Recommend</div>
+        <div class="step inactive">3. Validate</div>
       </div>
     """)
 
     # === Step 1 card ===
-    with gr.Row(elem_classes="card"):
+    with gr.Row(elem_id="main-card"):
         with gr.Column(scale=6):
-            with gr.Column(scale=6):
-                gr.Markdown("**Step 1: Upload an image for analysis**", elem_id="step-label")
-                img = gr.Image(type="numpy", label="Upload Product Image")
-                analyze_btn = gr.Button("🔍 Analyze the look!", variant="primary")
+            gr.Markdown("""
+            ### 1️⃣ Upload Product Image
+            Upload a clothing product image for instant AI-powered analysis.
+            """)
+            img = gr.Image(type="numpy", label="Upload Product Image", elem_id="upload-image")
+            analyze_btn = gr.Button("🔍 Analyze the Look", variant="primary")
         with gr.Column(scale=6):
             analysis_txt = gr.Textbox(
                 label="Analysis Output (JSON)",
@@ -192,30 +139,36 @@ with gr.Blocks(css=CSS, theme="light") as demo:
     analysis_state = gr.State()
 
     # === Step 2 card ===
-    with gr.Row(elem_classes="card"):
-        gr.Markdown("**Step 2: Use GPT4o-Mini to recommend a new look:**", elem_id="step-label")
-    with gr.Accordion(open=True):
-        gallery = gr.Gallery(
-            label="Matching Items",
-            elem_id="rec_gallery",
-            columns=4, 
-            height="300px",
-            interactive=False,
-        )
-    recommend_btn = gr.Button("🛍️ Recommend Matching Products", visible=False, variant="primary")
+    with gr.Row(elem_id="main-card"):
+        with gr.Column():
+            gr.Markdown("""
+            ### 2️⃣ AI Recommendation
+            Click below to get AI-powered product recommendations matching your style.
+            """)
+            recommend_btn = gr.Button("🛍️ Recommend Matching Products", visible=False, variant="primary")
+            gallery = gr.Gallery(
+                label="Matching Items",
+                elem_id="rec_gallery",
+                columns=4, 
+                height="320px",
+                interactive=False,
+            )
 
     # === Step 3 card ===
-    with gr.Row(elem_classes="card"):
-        gr.Markdown("**Step 3: Validate Outfit Matches**", elem_id="step-label")
-    with gr.Accordion(open=True):
-        validated_gallery = gr.Gallery(
-            label="Validated Matches",
-            columns=2,
-            height="300px",
-            interactive=False,
-        )
-    validate_btn = gr.Button("✅ Validate Outfit Matches", visible=False, variant="primary")
-    
+    with gr.Row(elem_id="main-card"):
+        with gr.Column():
+            gr.Markdown("""
+            ### 3️⃣ Validate Outfit Matches
+            Review the recommended matches and validate the best outfit combinations.
+            """)
+            validate_btn = gr.Button("✅ Validate Outfit Matches", visible=False, variant="primary")
+            validated_gallery = gr.Gallery(
+                label="Validated Matches",
+                columns=2,
+                height="320px",
+                interactive=False,
+            )
+
     # wiring
     analyze_btn.click(
         fn=analyze_step,
