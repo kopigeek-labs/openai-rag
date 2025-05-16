@@ -55,6 +55,28 @@ body, .block {
   height: 128px !important;
   object-fit: contain;
 }
+/* make each “slide” fill the full Gallery width */
+#big_carousel .gallery-item {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+}
+
+/* lay out items in a row and allow horizontal scroll */
+#big_carousel .gallery-container {
+  display: flex !important;
+  overflow-x: auto  !important;
+  scroll-snap-type: x mandatory;
+}
+
+/* optional: snap each item into place as you scroll */
+#big_carousel .gallery-item {
+  scroll-snap-align: center;
+}
+
+#preview img {
+  width: 100% !important;
+  height: auto   !important;
+}
 """
 
 def get_unique_subcategories():
@@ -105,19 +127,20 @@ def recommend_step(analysis_json):
         ie = get_embeddings([d])
         similar_indices += find_similar_items(ie, emb_list)
 
-    paths = []
-    for idx in similar_indices:
+    gallery_items = []
+    for idx in similar_indices:  # Process all similar items
         pid = df.iloc[idx]['id']
         img_path = os.path.join(IMAGES_DIR, f"{pid}.jpg")
         if os.path.exists(img_path):
-            paths.append(img_path)
-    if not paths:
+            caption = f"Product {pid}"
+            gallery_items.append((img_path, caption))
+    if not gallery_items:
         return [], gr.update(visible=False)
-    return paths, gr.update(visible=True)
+    return gallery_items, gr.update(visible=True)
 
 def validate_matches_step(image_np, gallery_paths):
     if image_np is None or not gallery_paths:
-        return [], "No images to validate."
+        return []
     # Save and encode reference image
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
         PILImage.fromarray(image_np).save(tmp.name)
@@ -132,14 +155,14 @@ def validate_matches_step(image_np, gallery_paths):
         result = check_match(reference_b64, suggested_b64)
         if hasattr(result, 'answer') and result.answer.lower() == "yes":
             validated.append(img_path)
-            reasons.append(f"Match: {os.path.basename(img_path)}\nReason: {getattr(result, 'reason', '')}")
+            reasons.append(f"{getattr(result, 'reason', '')}")
         elif isinstance(result, dict) and result.get('answer', '').lower() == "yes":
             validated.append(img_path)
-            reasons.append(f"Match: {os.path.basename(img_path)}\nReason: {result.get('reason', '')}")
+            reasons.append(f"{result.get('reason', '')}")
     if not validated:
-        return [], []
+        return []
 
-    # build list of (img, caption)
+    # build list of (img, caption) for gallery
     gallery_items = list(zip(validated, reasons))
     return gallery_items
 
@@ -183,12 +206,13 @@ with gr.Blocks(css=CSS, theme="light") as demo:
 
     # === Step 3 card ===
     with gr.Row(elem_classes="card"):
-        gr.Markdown("**Step 3: Validate Outfit Matches:**", elem_id="step-label")
+        gr.Markdown("**Step 3: Validate Outfit Matches**", elem_id="step-label")
     with gr.Accordion(open=True):
         validated_gallery = gr.Gallery(
             label="Validated Matches",
             columns=2,
-            height="300px"
+            height="300px",
+            interactive=False,
         )
     validate_btn = gr.Button("✅ Validate Outfit Matches", visible=False, variant="primary")
     
@@ -199,7 +223,6 @@ with gr.Blocks(css=CSS, theme="light") as demo:
         outputs=[analysis_txt, analysis_state, recommend_btn],
         show_progress=True
     )
-
     recommend_btn.click(
         fn=recommend_step,
         inputs=[analysis_state],
@@ -212,6 +235,7 @@ with gr.Blocks(css=CSS, theme="light") as demo:
         outputs=[validated_gallery],
         show_progress=True
     )
+
 
 demo.launch(allowed_paths=[IMAGES_DIR])
 
