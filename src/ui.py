@@ -3,7 +3,7 @@ import json, ast, os, tempfile
 import pandas as pd
 from PIL import Image as PILImage
 from src.utils import encode_image_to_base64, find_similar_items
-from src.main import analyze_image, get_embeddings
+from src.main import analyze_image, get_embeddings, check_match
 
 IMAGES_DIR = os.path.abspath("data/sample_clothes/sample_images")
 
@@ -81,10 +81,10 @@ def analyze_step(image_np):
     # show the Recommend button now
     return raw, raw, gr.update(visible=True)
 
-def recommend_step(image_np, analysis_json):
+def recommend_step(analysis_json):
     """Step 2: read the stashed JSON, run RAG, and return image paths."""
     if analysis_json is None:
-        return ["⚠️ Run “Analyze” first!"]
+        return [], gr.update(visible=False)
     info = json.loads(analysis_json)
     descs = info['items']
     gender = info['gender']
@@ -92,7 +92,7 @@ def recommend_step(image_np, analysis_json):
 
     styles_fp = "data/sample_clothes/sample_styles_with_embeddings.csv"
     if not os.path.exists(styles_fp):
-        return ["Styles file not found."]
+        return [], gr.update(visible=False)
     df = pd.read_csv(styles_fp, on_bad_lines='skip')
     df['embeddings'] = df['embeddings'].apply(ast.literal_eval)
     df = df[df['gender'].isin([gender, 'Unisex'])]
@@ -108,30 +108,54 @@ def recommend_step(image_np, analysis_json):
     paths = []
     for idx in similar_indices:
         pid = df.iloc[idx]['id']
-        # 2) build absolute path under IMAGES_DIR
         img_path = os.path.join(IMAGES_DIR, f"{pid}.jpg")
-        paths.append(img_path)
-    return paths or ["No matches found."]
+        if os.path.exists(img_path):
+            paths.append(img_path)
+    if not paths:
+        return [], gr.update(visible=False)
+    return paths, gr.update(visible=True)
+
+def validate_matches_step(image_np, gallery_paths):
+    if image_np is None or not gallery_paths:
+        return [], "No images to validate."
+    # Save and encode reference image
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+        PILImage.fromarray(image_np).save(tmp.name)
+        reference_b64 = encode_image_to_base64(tmp.name)
+    validated = []
+    reasons = []
+    for img_path in gallery_paths:
+        # Handle both string paths and tuples containing paths
+        if isinstance(img_path, tuple):
+            img_path = img_path[0]  # Take the first element if it's a tuple
+        suggested_b64 = encode_image_to_base64(img_path)
+        result = check_match(reference_b64, suggested_b64)
+        if hasattr(result, 'answer') and result.answer.lower() == "yes":
+            validated.append(img_path)
+            reasons.append(f"Match: {os.path.basename(img_path)}\nReason: {getattr(result, 'reason', '')}")
+        elif isinstance(result, dict) and result.get('answer', '').lower() == "yes":
+            validated.append(img_path)
+            reasons.append(f"Match: {os.path.basename(img_path)}\nReason: {result.get('reason', '')}")
+    if not validated:
+        return [], "No valid matches found."
+    return validated, "\n\n".join(reasons)
 
 # —— Build the UI ——
-with gr.Blocks(css=CSS) as demo:
+with gr.Blocks(css=CSS, theme="light") as demo:
     # HEADER
     gr.HTML("""
       <div id="header">
         <h1>👗 GPT4o-mini Clothing Style Analyzer & Recommender</h1>
-        <p></p>
-        <p class="subtitle"> 
-        Step 1: Upload an image for analysis … 
-        Step 2: Let the AI recommened a few new items to match the style!
-        </p>
       </div>
     """)
 
     # === Step 1 card ===
     with gr.Row(elem_classes="card"):
         with gr.Column(scale=6):
-            img = gr.Image(type="numpy", label="Upload Product Image")
-            analyze_btn = gr.Button("🔍 Analyze Image", variant="primary")
+            with gr.Column(scale=6):
+                gr.Markdown("**Step 1: Upload an image for analysis**", elem_id="step1-label")
+                img = gr.Image(type="numpy", label="Upload Product Image")
+                analyze_btn = gr.Button("🔍 Analyze the look!", variant="primary")
         with gr.Column(scale=6):
             analysis_txt = gr.Textbox(
                 label="Analysis Output (JSON)",
@@ -140,16 +164,27 @@ with gr.Blocks(css=CSS) as demo:
             )
 
     analysis_state = gr.State()
-    recommend_btn   = gr.Button("🛍️ Show Matching Items", visible=False, variant="primary")
 
     # === Step 2 card ===
-    with gr.Accordion("Step 2: Recommendations", open=False, elem_classes="card"):
+    with gr.Accordion("Step 2: Use GPT4o-Mini to recommend a new look:", open=True, elem_classes="card"):
         gallery = gr.Gallery(
             label="Matching Items",
             elem_id="rec_gallery",
             columns=4, height="300px"
         )
+    recommend_btn   = gr.Button("🛍️ Recommend Matching Products", visible=False, variant="primary")
 
+    with gr.Accordion("Step 3: Validate Outfit Matches", open=True, elem_classes="card"):
+        validated_gallery = gr.Gallery(
+            label="Validated Matches",
+            columns=4, height="300px"
+        )
+        validation_reasons = gr.Textbox(
+            label="Validation Reasoning",
+            interactive=False, lines=6
+        )
+    validate_btn = gr.Button("✅ Validate Outfit Matches", visible=False, variant="primary")
+    
     # wiring
     analyze_btn.click(
         fn=analyze_step,
@@ -157,11 +192,20 @@ with gr.Blocks(css=CSS) as demo:
         outputs=[analysis_txt, analysis_state, recommend_btn],
         show_progress=True
     )
+
     recommend_btn.click(
         fn=recommend_step,
-        inputs=[img, analysis_state],
-        outputs=[gallery],
+        inputs=[analysis_state],
+        outputs=[gallery,validate_btn],
+        show_progress=True
+    )
+    validate_btn.click(
+        fn=validate_matches_step,
+        inputs=[img, gallery],
+        outputs=[validated_gallery, validation_reasons],
         show_progress=True
     )
 
 demo.launch(allowed_paths=[IMAGES_DIR])
+
+

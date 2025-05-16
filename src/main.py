@@ -11,6 +11,8 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 from dotenv import load_dotenv
 from typing import List
 import base64
+from pydantic import BaseModel
+
 
 # Custom utility functions for embedding and similarity search
 from .utils import batchify, cosine_similarity_manual, find_similar_items, encode_image_to_base64
@@ -93,7 +95,46 @@ def analyze_image(image_base64, subcategories):
     features = response.choices[0].message.content
     return features
 
-    
+## Implement Guardrails for the output of the matching outfits, using Responses API and Structured Output Parsing
+class GuardrailMatchResponse(BaseModel):
+    answer: str
+    reason: str
+
+def check_match(reference_image_base64, suggested_image_base64):
+    response = client.responses.parse(
+        model=GPT_MODEL,
+        input=[{
+            "role": "user",
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": (
+                        """You will be given two images of two different items of clothing. 
+                        Your goal is to decide if the items in the images would work in an outfit together. 
+                        The first image is the reference item (the item that the user is trying to match with another item). 
+                        You need to decide if the second item would work well with the reference item. 
+                        The "answer" field must be either "yes" or "no", depending on whether you think the
+                        items would work well together. The "reason" field must be a short explanation of your reasoning 
+                        for your decision. Do not include the descriptions of the 2 images."""
+                    ),
+                },
+                {
+                    "type": "input_image",
+                    "image_url": f"data:image/jpeg;base64,{reference_image_base64}",
+                },
+                {
+                    "type": "input_image",
+                    "image_url": f"data:image/jpeg;base64,{suggested_image_base64}",
+                },
+            ]
+        }],
+        text_format=GuardrailMatchResponse,
+        max_output_tokens=300,
+    )
+
+    features = response.output_parsed
+    return features
+
 # def main():
 #     styles_filepath = "data/sample_clothes/sample_styles.csv"
 #     output_filepath = "data/sample_clothes/sample_styles_with_embeddings.csv"
