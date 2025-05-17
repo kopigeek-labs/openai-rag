@@ -14,6 +14,7 @@ def load_css():
 
 CSS = load_css()
 
+# Get unique subcategories from the inventory dataset
 def get_unique_subcategories():
     styles_filepath = "data/sample_clothes/sample_styles.csv"
     if not os.path.exists(styles_filepath):
@@ -23,6 +24,7 @@ def get_unique_subcategories():
 
 SUBCATEGORIES = get_unique_subcategories()
 
+# Step 1 : User input, image analysis, feature extraction
 def analyze_step(image_np):
     if image_np is None:
         return "👉 Please upload an image first.", None, gr.update(visible=False)
@@ -32,6 +34,7 @@ def analyze_step(image_np):
     raw = analyze_image(b64, SUBCATEGORIES)
     return raw, raw, gr.update(visible=True)
 
+# Step 2 : Load Embeddings from Vector Store, Retrieve similar items, Load images
 def recommend_step(analysis_json):
     if analysis_json is None:
         return [], gr.update(visible=False)
@@ -48,12 +51,14 @@ def recommend_step(analysis_json):
     df = df[df['gender'].isin([gender, 'Unisex'])]
     df = df[df['articleType'] != category]
 
-    emb_list = df['embeddings'].tolist()
+    emb_list = df['embeddings'].tolist() # embedding from vector store
     similar_indices = []
     for d in descs:
-        ie = get_embeddings([d])
-        similar_indices += find_similar_items(ie, emb_list)
+        ie = get_embeddings([d]) # input query embedding
+        similar_indices += [idx for idx, _ in find_similar_items(ie, emb_list)]
+    similar_indices = list(dict.fromkeys(similar_indices))[:4] # limit 4 recommendations
 
+    # Create image gallery items
     gallery_items = []
     for idx in similar_indices:
         pid = df.iloc[idx]['id']
@@ -65,6 +70,7 @@ def recommend_step(analysis_json):
         return [], gr.update(visible=False)
     return gallery_items, gr.update(visible=True)
 
+# Step 3: Validate Outfit Matches
 def validate_matches_step(image_np, gallery_paths):
     if image_np is None or not gallery_paths:
         return []
@@ -89,6 +95,7 @@ def validate_matches_step(image_np, gallery_paths):
     gallery_items = list(zip(validated, reasons))
     return gallery_items
 
+# Gradio UI
 with gr.Blocks(css=CSS, theme="light") as demo:
     gr.HTML("""
       <div id="header">
