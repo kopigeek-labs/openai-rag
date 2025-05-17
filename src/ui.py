@@ -95,19 +95,19 @@ def validate_matches_step(image_np, gallery_paths):
     gallery_items = list(zip(validated, reasons))
     return gallery_items
 
-# Gradio UI
-with gr.Blocks(css=CSS, theme="light") as demo:
+# 
+with gr.Blocks(css=CSS) as demo:
     gr.HTML("""
       <div id="header">
-        <h1>👗 GPT4o Clothing Style Analyzer</h1>
+        <h1> 👗 Outfit Assistant - Prototype </h1>
         <p>Discover, recommend, and validate fashion looks with AI. Powered by GPT-4o-mini.</p>
       </div>
     """)
     gr.HTML("""
       <div class="stepper">
-        <div class="step">1. Analyze</div>
-        <div class="step inactive">2. Recommend</div>
-        <div class="step inactive">3. Validate</div>
+        <div class="step">1. Analyze your fit</div>
+        <div class="step inactive">2. Recommend matching fits </div>
+        <div class="step inactive">3. Validate the recommendation </div>
       </div>
     """)
     with gr.Row(elem_id="main-card"):
