@@ -13,6 +13,7 @@ def load_css():
         return f.read()
 
 CSS = load_css()
+# CSS = ""
 
 # Get unique subcategories from the inventory dataset
 def get_unique_subcategories():
@@ -27,12 +28,16 @@ SUBCATEGORIES = get_unique_subcategories()
 # Step 1 : User input, image analysis, feature extraction
 def analyze_step(image_np):
     if image_np is None:
-        return "👉 Please upload an image first.", None, gr.update(visible=False)
+        return None, None, gr.update(visible=False)
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
         PILImage.fromarray(image_np).save(tmp.name)
         b64 = encode_image_to_base64(tmp.name)
     raw = analyze_image(b64, SUBCATEGORIES)
-    return raw, raw, gr.update(visible=True)
+    try:
+        parsed = json.loads(raw)
+    except Exception:
+        parsed = {"error": raw}
+    return parsed, raw, gr.update(visible=True)
 
 # Step 2 : Load Embeddings from Vector Store, Retrieve similar items, Load images
 def recommend_step(analysis_json):
@@ -119,10 +124,10 @@ with gr.Blocks(css=CSS) as demo:
             img = gr.Image(type="numpy", label="Upload Product Image", elem_id="upload-image")
             analyze_btn = gr.Button("🔍 Analyze the Look", variant="primary")
         with gr.Column(scale=6):
-            analysis_txt = gr.Textbox(
+            analysis_json = gr.JSON(
                 label="Analysis Output (JSON)",
-                interactive=False, lines=8,
-                placeholder="Your JSON will appear here…"
+                show_indices=False,
+                visible=True,
             )
     analysis_state = gr.State()
     with gr.Row(elem_id="main-card"):
@@ -155,7 +160,7 @@ with gr.Blocks(css=CSS) as demo:
     analyze_btn.click(
         fn=analyze_step,
         inputs=[img],
-        outputs=[analysis_txt, analysis_state, recommend_btn],
+        outputs=[analysis_json, analysis_state, recommend_btn],
         show_progress=True
     )
     recommend_btn.click(

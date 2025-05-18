@@ -1,19 +1,21 @@
 /* ───────────── Variables ───────────── */
 :root {
-  --bg-base:     #FCFAF6;   /* very light cream */
-  --text-body:   #333333;   /* dark grey */
-  --gold-primary:#E6A400;   /* warm golden accent */
-  --gold-light:  #FFF4D9;   /* pale highlight */
-  --border-light:#DDD6C5;   /* subtle neutral */
-  --btn-hover:   #CC8F00;   /* darker on hover */
+  --bg-base: #fcfaf6; /* very light cream */
+  --text-body: #333333; /* dark grey */
+  --gold-primary: #e6a400; /* warm golden accent */
+  --gold-light: #fff4d9; /* pale highlight */
+  --border-light: #ddd6c5; /* subtle neutral */
+  --btn-hover: #cc8f00; /* darker on hover */
 }
 
 /* ───────────── Global ───────────── */
-body, .block {
+body,
+.block {
   background-color: var(--bg-base);
   color: var(--text-body);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0; padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 /* ───────────── Header ───────────── */
@@ -34,8 +36,9 @@ body, .block {
 }
 
 /* ───────────── Cards & Containers ───────────── */
-.card, .gr-accordion {
-  background: #FFFFFF;
+.card,
+.gr-accordion {
+  background: #ffffff;
   border: 1px solid var(--border-light);
   border-radius: 0.25rem;
   padding: 1rem;
@@ -43,8 +46,9 @@ body, .block {
 }
 
 /* ───────────── Buttons ───────────── */
-.gr-button, button {
-  background: #FFFFFF !important;
+.gr-button,
+button {
+  background: #ffffff45 !important;
   color: var(--gold-primary) !important;
   border: 1px solid var(--gold-primary) !important;
   border-radius: 0.25rem !important;
@@ -53,27 +57,29 @@ body, .block {
   font-size: 1rem !important;
   transition: all 0.2s;
 }
-.gr-button:hover, button:hover {
+.gr-button:hover,
+button:hover {
   background: var(--gold-primary) !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
   border-color: var(--btn-hover) !important;
 }
 
 /* ───────────── Form Elements ───────────── */
-.gr-textbox, .gr-image, .gr-gallery, .gr-html {
-  background: #FFFFFF !important;
+.gr-textbox,
+.gr-image,
+.gr-gallery,
+.gr-html {
+  background: #ffffff !important;
   border: 1px solid var(--border-light) !important;
   border-radius: 0.25rem !important;
   margin-bottom: 1rem !important;
 }
 
 /* ───────────── Typography ───────────── */
-.gr-markdown h2, .gr-markdown h3 {
-  color: var(--gold-primary);
-  font-weight: 700;
-  margin-top: 1.2rem;
-}
-.gr-markdown p, .gr-markdown li {
+.gr-markdown h2,
+.gr-markdown h3,
+.gr-markdown p,
+.gr-markdown li {
   line-height: 1.5;
 }
 
@@ -87,13 +93,60 @@ body, .block {
   transition: box-shadow 0.2s;
 }
 #rec_gallery .gallery-item img:hover {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ───────────── JSON Viewer Customization ───────────── */
+/* Make JSON expand/collapse arrows smaller and less intrusive */
+#json-node .gr-json .json-toggle,
+#json-node .gr-json .json-arrow {
+  font-size: 0.8em !important;
+  width: 1em !important;
+  height: 1em !important;
+  padding: 0.1em !important;
+  margin-right: 0.25em !important;
+  background: none !important;
+  border: none !important;
+  color: var(--gold-primary) !important;
+  vertical-align: middle;
+  cursor: pointer;
+}
+#json-node .gr-json .json-arrow {
+  /* border-radius: 50%; */
+  transition: background 0.2s;
+}
+#json-node .gr-json .json-arrow:hover {
+  background: var(--gold-light);
+}
+
+/* Syntax highlighting for JSON keys, values, and types */
+#json-node .gr-json .json-key {
+  color: #b07d00;
+  font-weight: 600;
+}
+#json-node .gr-json .json-string {
+  color: #008080;
+}
+#json-node .gr-json .json-number {
+  color: #b4004e;
+}
+#json-node .gr-json .json-boolean {
+  color: #007a3d;
+  font-weight: 600;
+}
+#json-node .gr-json .json-null {
+  color: #888888;
+  font-style: italic;
+}
+#json-node .gr-json .json-brace,
+#json-node .gr-json .json-bracket {
+  color: #888888;
 }
 
 /* Step 3 big carousel */
 #big_carousel .gallery-container {
   display: flex !important;
-  overflow-x: auto  !important;
+  overflow-x: auto !important;
   scroll-snap-type: x mandatory;
   gap: 1rem;
   padding-bottom: 0.5rem;
@@ -105,6 +158,6 @@ body, .block {
 }
 #preview img {
   width: 100% !important;
-  height: auto   !important;
+  height: auto !important;
   border-radius: 0.25rem;
 }
