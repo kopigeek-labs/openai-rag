@@ -1,5 +1,3 @@
-# openai-rag
-
 ## Overview
 
 This repo contains a demo "AI-powered Outfit Assistant" that analyzes clothing images, recommends matching items using OpenAI's GPT-4o-mini and Retrieval Augment Generation. The jupyter notebook shows the building blocks and the src folder contains an app and Gradio-based UI for seamless user interaction.
