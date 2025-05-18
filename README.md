@@ -2,28 +2,15 @@
 
 ## Overview
 
-**openai-rag** is an AI-powered outfit assistant that analyzes clothing images, recommends matching items, and validates outfit combinations using OpenAI's GPT-4o-mini and advanced embedding models. The app features a Gradio-based UI for seamless user interaction.
+This repo contains a demo "AI-powered Outfit Assistant" that analyzes clothing images, recommends matching items using OpenAI's GPT-4o-mini and Retrieval Augment Generation. The jupyter notebook shows the building blocks and the src folder contains an app and Gradio-based UI for seamless user interaction.
 
 ## Features
 
 - **Image Analysis:** Upload a clothing product image and receive a structured JSON analysis (items, category, gender) using GPT-4o-mini.
-- **AI Recommendations:** Retrieve and display visually and semantically similar items from a product catalog using vector embeddings and similarity search.
+- **AI Recommendations:** Retrieve and display semantically similar items from a product catalog using vector embeddings and similarity search.
 - **Outfit Validation:** Validate recommended matches with AI guardrails to ensure stylistic compatibility.
+- **Image Generation** Put the look together. Using the reference image and the newly recommended items for a new holistic look.
 - **Interactive UI:** Step-by-step workflow with image upload, recommendations, and validation, all in a modern Gradio interface.
-
-## How It Works
-
-1. **Analyze Image:**
-   - User uploads a product image.
-   - The backend encodes the image and sends it to GPT-4o-mini for analysis.
-   - The model returns a JSON with suggested matching items, category, and gender.
-2. **Recommend Items:**
-   - The app loads precomputed embeddings for the inventory.
-   - It finds the most similar items (excluding same category/gender) using cosine similarity.
-   - Top matches are displayed in a gallery.
-3. **Validate Matches:**
-   - The user can validate if recommended items truly match the uploaded product.
-   - The system uses GPT-4o-mini to check compatibility and provides reasons for each validated match.
 
 ## Interactive Python Notebook
 
@@ -35,7 +22,6 @@
 - `src/ui.py`: Gradio UI and workflow orchestration.
 - `src/utils.py`: Utility functions for embeddings and image encoding.
 - `src/static/styles.css`: Custom CSS for UI styling.
-- `data/sample_clothes/`: Sample images and inventory CSVs.
 
 ## Getting Started
 
