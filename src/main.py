@@ -135,6 +135,31 @@ def check_match(reference_image_base64, suggested_image_base64):
     features = response.output_parsed
     return features
 
+def generate_combined_outfit(reference_image, paths, style_index=0):
+    image_styles = [
+        "High-Fashion Runway Illustration",
+        "Retro 80s/90s anime",
+    ]
+    image_style = image_styles[style_index]
+    prompt = f"""
+    Keeping the original model outfit, add in new clothing accessories from the other images.\n
+    The resulting look would be a combined outfit showing off combined items as a new look on one model.\n
+    The new outfit must be a combination of the original outfit and the new items,\n 
+    if there are more than one of the same items, just pick one, do not modify the item and keep its original design.\n
+    Return the image in {image_style} style, with a dark background.\n
+    Always include the full outfit look including shoes. The shoes must match and be the same as the reference images.
+    """
+    img = client.images.edit(
+        image=[open(reference_image, "rb")] + [open(p, "rb") for p in paths],
+        prompt=prompt,
+        model="gpt-image-1",
+        n=1,
+        size="1024x1536",
+        quality="medium",
+        background="auto",
+    )
+    return img
+
 # def main():
 #     styles_filepath = "data/sample_clothes/sample_styles.csv"
 #     output_filepath = "data/sample_clothes/sample_styles_with_embeddings.csv"

@@ -1,10 +1,13 @@
 import gradio as gr
 import json, ast, os, tempfile
 import pandas as pd
+import base64
+import time
 from PIL import Image as PILImage
-from src.main import analyze_image, get_embeddings, check_match, encode_image_to_base64, find_similar_items
+from src.main import analyze_image, get_embeddings, check_match, encode_image_to_base64, find_similar_items, generate_combined_outfit
 
 IMAGES_DIR = os.path.abspath("data/sample_clothes/sample_images")
+OUTPUT_DIR = os.path.abspath("data/test")
 
 # Load CSS from external file
 def load_css():
@@ -78,7 +81,7 @@ def recommend_step(analysis_json):
 # Step 3: Validate Outfit Matches
 def validate_matches_step(image_np, gallery_paths):
     if image_np is None or not gallery_paths:
-        return []
+        return [], gr.update(visible=False)
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
         PILImage.fromarray(image_np).save(tmp.name)
         reference_b64 = encode_image_to_base64(tmp.name)
@@ -89,18 +92,43 @@ def validate_matches_step(image_np, gallery_paths):
             img_path = img_path[0]
         suggested_b64 = encode_image_to_base64(img_path)
         result = check_match(reference_b64, suggested_b64)
-        if hasattr(result, 'answer') and result.answer.lower() == "yes":
+        answer = None
+        reason = None
+        if hasattr(result, 'answer'):
+            answer = result.answer
+            reason = getattr(result, 'reason', '')
+        elif isinstance(result, dict):
+            answer = result.get('answer', '')
+            reason = result.get('reason', '')
+        print(f"Validation for item: answer={answer}, reason={reason}")
+        if answer and answer.lower() == "yes":
             validated.append(img_path)
-            reasons.append(f"{getattr(result, 'reason', '')}")
-        elif isinstance(result, dict) and result.get('answer', '').lower() == "yes":
-            validated.append(img_path)
-            reasons.append(f"{result.get('reason', '')}")
+            reasons.append(f"{reason}")
     if not validated:
-        return []
+        return [], gr.update(visible=False)
     gallery_items = list(zip(validated, reasons))
-    return gallery_items
+    return gallery_items, gr.update(visible=True)
 
-# 
+# Step 4: Generate Outfit Image
+def generate_outfit_step(image_np, gallery_paths):
+    if image_np is None or not gallery_paths:
+        return None
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+        PILImage.fromarray(image_np).save(tmp.name)
+        reference_image_path = tmp.name
+    accessory_paths = [p[0] if isinstance(p, tuple) else p for p in gallery_paths]
+    img = generate_combined_outfit(reference_image_path, accessory_paths)
+    image_base64 = img.data[0].b64_json
+    image_bytes = base64.b64decode(image_base64)
+
+    timestamp = int(time.time())
+    output_path = f"data/test/output_{timestamp}.png"
+    with open(output_path, "wb") as f:
+        f.write(image_bytes)
+
+    return output_path
+
+# Gradio Interface
 with gr.Blocks(css=CSS) as demo:
     gr.HTML("""
       <div id="header">
@@ -157,6 +185,17 @@ with gr.Blocks(css=CSS) as demo:
                 height="320px",
                 interactive=False,
             )
+    with gr.Row(elem_id="main-card"):
+        with gr.Column():
+            gr.Markdown("""
+            ### 4️⃣ Generate Combined Outfit Image
+            Create a new look by combining the validated outfit items into a single image.
+            """)
+            output_img = gr.Image(label="Generated Outfit", elem_id="output-image", height=768, width=512)
+            generate_btn = gr.Button("🎨 Generate Combined Outfit", visible=False, variant="primary")
+
+
+# Wiring up the steps
     analyze_btn.click(
         fn=analyze_step,
         inputs=[img],
@@ -172,10 +211,16 @@ with gr.Blocks(css=CSS) as demo:
     validate_btn.click(
         fn=validate_matches_step,
         inputs=[img, gallery],
-        outputs=[validated_gallery],
+        outputs=[validated_gallery, generate_btn],
+        show_progress=True
+    )
+    generate_btn.click(
+        fn=generate_outfit_step,
+        inputs=[img, validated_gallery],
+        outputs=[output_img],
         show_progress=True
     )
 
-demo.launch(allowed_paths=[IMAGES_DIR])
+demo.launch(allowed_paths=[IMAGES_DIR, OUTPUT_DIR])
 
 
